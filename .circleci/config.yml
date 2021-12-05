@@ -32,4 +32,4 @@ workflows:
             - iamevan-me/gcp
           filters:
              branches:
-               only: master
+               only: main
