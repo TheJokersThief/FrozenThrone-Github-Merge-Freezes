@@ -1,12 +1,15 @@
-module frozen_throne
+module github.com/TheJokersThief/frozen-throne
 
 go 1.17
 
-require github.com/kelseyhightower/envconfig v1.4.0
+require (
+	cloud.google.com/go/storage v1.18.2
+	github.com/kelseyhightower/envconfig v1.4.0
+)
 
 require (
 	cloud.google.com/go v0.97.0 // indirect
-	cloud.google.com/go/storage v1.18.2 // indirect
+	github.com/alecthomas/repr v0.0.0-20210801044451-80ca428c5142 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect

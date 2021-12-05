@@ -3,39 +3,37 @@ package main
 import (
 	"context"
 	"log"
-	"net/http"
 
+	"github.com/alecthomas/repr"
 	"github.com/kelseyhightower/envconfig"
 
-	"frozen_throne/frozen_throne/config"
-	"frozen_throne/frozen_throne/storage"
+	"github.com/TheJokersThief/frozen-throne/frozen_throne/config"
+	"github.com/TheJokersThief/frozen-throne/frozen_throne/storage"
 )
 
 type FrozenThrone struct {
-	Name    string
-	Config  interface{}
+	Config  config.Config
 	Storage storage.StorageInterface
 }
 
-func NewFrozenThrone(name string, ctx context.Context) *FrozenThrone {
+func NewFrozenThrone(ctx context.Context) *FrozenThrone {
 	config := config.Config{}
 
 	if err := envconfig.Process("", &config); err != nil {
 		log.Fatalf("failed to parse config: %v", err)
 	}
 
+	repr.Print(config)
+
 	var throneStorage storage.StorageInterface
 	switch config.StorageMethod {
 	case "gcs":
 		throneStorage = storage.NewGCSStorage(config, ctx)
-	case "redis":
-		throneStorage = storage.NewRedisStorage()
 	default:
 		panic("Storage method chosen does not match the methods available")
 	}
 
 	return &FrozenThrone{
-		Name:    name,
 		Config:  config,
 		Storage: throneStorage,
 	}
@@ -51,8 +49,4 @@ func (f *FrozenThrone) Unfreeze(name string) error {
 
 func (f *FrozenThrone) Check(name string) (string, error) {
 	return f.Storage.GetKey(name)
-}
-
-func IngestHttp(w http.ResponseWriter, r *http.Request) {
-	// throne := NewFrozenThrone("test")
 }

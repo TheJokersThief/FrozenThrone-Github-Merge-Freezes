@@ -4,14 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"frozen_throne/frozen_throne/config"
 	"io/ioutil"
+
+	"github.com/TheJokersThief/frozen-throne/frozen_throne/config"
 
 	gcs "cloud.google.com/go/storage"
 )
 
 type GCSStorage struct {
-	StorageInterface
 	Context       context.Context
 	Config        *config.GCSConfig
 	ServiceConfig *config.Config
@@ -19,6 +19,7 @@ type GCSStorage struct {
 	Bucket        *gcs.BucketHandle
 }
 
+// NewGCSStorage returns a GCS storage engine
 func NewGCSStorage(config config.Config, ctx context.Context) *GCSStorage {
 	client, err := gcs.NewClient(context.Background())
 	if err != nil {
