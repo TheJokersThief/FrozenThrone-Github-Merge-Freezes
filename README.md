@@ -22,13 +22,13 @@ The deployed cloud function uses the GCP Secret Manager to store secret values f
 * The Write Secret token
 * The Read-Only Secret token
 
-```
+```bash
 PROJECT_ID=<ID> make create_secrets
 ```
 
 Or update existing secrets with
 
-```
+```bash
 PROJECT_ID=<ID> \
 WRITE_SECRET=<secret> \
 READ_ONLY_SECRET=<secret>\
@@ -37,6 +37,6 @@ READ_ONLY_SECRET=<secret>\
 
 ## Deploy function
 
-```
+```bash
 PROJECT_ID=<ID> make deploy_to_gfunctions
 ```
