@@ -15,8 +15,8 @@ create_secrets: ## Create secret values
 
 .PHONY: update_secrets
 update_secrets: ## Update secret values
-	echo -n "${WRITE_SECRET}" | gcloud --project ${PROJECT_ID} versions add FT_WRITE_SECRET --data-file=-
-	echo -n "${READ_ONLY_SECRET}" | gcloud --project ${PROJECT_ID} versions add FT_READ_ONLY_SECRET --data-file=-
+	echo -n "${WRITE_SECRET}" | gcloud --project ${PROJECT_ID} secrets versions add FT_WRITE_SECRET --data-file=-
+	echo -n "${READ_ONLY_SECRET}" | gcloud --project ${PROJECT_ID} secrets versions add FT_READ_ONLY_SECRET --data-file=-
 
 .PHONY: add_perms
 add_perms: ## Add permissions for functions account to access secrets
