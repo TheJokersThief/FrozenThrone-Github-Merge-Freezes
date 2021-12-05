@@ -1,4 +1,4 @@
-package main
+package frozen_throne
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
+	ft "github.com/TheJokersThief/frozen-throne/frozen_throne"
 	"github.com/TheJokersThief/frozen-throne/frozen_throne/config"
 )
 
@@ -17,7 +18,7 @@ type StatusResponse struct {
 
 // IngestHTTP handles routing the HTTP request of the cloud function
 func IngestHTTP(w http.ResponseWriter, r *http.Request) {
-	ft := NewFrozenThrone(context.Background())
+	ft := ft.NewFrozenThrone(context.Background())
 
 	switch r.Method {
 	case http.MethodGet: // Status check

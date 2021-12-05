@@ -1,4 +1,4 @@
-package main
+package frozen_throne
 
 import (
 	"context"
