@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 
-	"github.com/alecthomas/repr"
 	"github.com/kelseyhightower/envconfig"
 
 	"github.com/TheJokersThief/frozen-throne/frozen_throne/config"
@@ -22,8 +21,6 @@ func NewFrozenThrone(ctx context.Context) *FrozenThrone {
 	if err := envconfig.Process("", &config); err != nil {
 		log.Fatalf("failed to parse config: %v", err)
 	}
-
-	repr.Print(config)
 
 	var throneStorage storage.StorageInterface
 	switch config.StorageMethod {
