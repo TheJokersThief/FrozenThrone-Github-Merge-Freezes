@@ -43,7 +43,7 @@ jobs:
       - run:
           name: "Deploy Cloud Function"
           command: |
-            PROJECT_ID=$GOOGLE_PROJECT_ID make deploy_to_gfunctions
+            PROJECT_ID=$GOOGLE_PROJECT_ID make deploy
 
 workflows:
   version: 2
