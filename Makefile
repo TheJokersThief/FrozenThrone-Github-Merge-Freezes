@@ -61,7 +61,7 @@ deploy: cloud_build ## Deploy function to GCP Cloud Functions
 		--timeout 20s \
 		--set-env-vars GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GCS_BUCKET="${GCS_BUCKET}" \
 		--set-secrets 'WRITE_SECRET=FT_WRITE_SECRET:latest,READ_ONLY_SECRET=FT_READ_ONLY_SECRET:latest,WEBHOOK_SECRET=FT_WEBHOOK_SECRET:latest,GITHUB_APP_ID=FT_GITHUB_APP_ID:latest' \
-		--max-instances 10\
+		--max-instances 10 \
 		--port 8080 \
 		--allow-unauthenticated \
 		--image gcr.io/${PROJECT_ID}/${PROJECT_NAME}:latest
