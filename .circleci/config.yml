@@ -28,23 +28,22 @@ jobs:
       - run:
           name: "Copy go binary"
           command: mv /tmp/workspace/bin ./bin
-      - run:
-          name: "Copy go binary"
-          command: ls -alR bin/
       - gcp-cli/install:
           version: "365.0.1"
       - gcp-cli/initialize
-      # - run:
-      #     name: "Update secrets"
-      #     command: |
-      #       PROJECT_ID=$GOOGLE_PROJECT_ID\
-      #         WRITE_SECRET=$WRITE_SECRET\
-      #         READ_ONLY_SECRET=$READ_ONLY_SECRET\
-      #         make update_secrets
-      # - run:
-      #     name: "Deploy Cloud Function"
-      #     command: |
-      #       PROJECT_ID=$GOOGLE_PROJECT_ID make deploy_to_gfunctions
+      - run:
+          name: "Update secrets"
+          command: |
+            PROJECT_ID=$GOOGLE_PROJECT_ID\
+              WRITE_SECRET=$WRITE_SECRET\
+              READ_ONLY_SECRET=$READ_ONLY_SECRET\
+              WEBHOOK_SECRET=WEBHOOK_SECRET\
+              GITHUB_APP_ID=GITHUB_APP_ID\
+              make update_secrets
+      - run:
+          name: "Deploy Cloud Function"
+          command: |
+            PROJECT_ID=$GOOGLE_PROJECT_ID make deploy_to_gfunctions
 
 workflows:
   version: 2
