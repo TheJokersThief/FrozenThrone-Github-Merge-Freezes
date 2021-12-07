@@ -30,7 +30,7 @@ jobs:
           command: mv /tmp/workspace/bin ./bin
       - gcp-cli/install:
           version: "365.0.1"
-      - gcp-cli/initialize
+      - gcp-cli/initialize:
           google-compute-region: "europe-west1"
           google-compute-zone: "europe-west1-a"
           google-project-id: $GOOGLE_PROJECT_ID
