@@ -40,10 +40,6 @@ jobs:
               WEBHOOK_SECRET=$WEBHOOK_SECRET\
               GITHUB_APP_ID=$GITHUB_APP_ID\
               make update_secrets
-      - run:
-          name: "Deploy"
-          command: |
-            PROJECT_ID=$GOOGLE_PROJECT_ID make deploy
 
 workflows:
   version: 2
