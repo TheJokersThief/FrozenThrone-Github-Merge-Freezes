@@ -4,5 +4,5 @@ steps:
   args:
   # Cloud Build automatically substitutes the project ID from the project containing the Dockerfile.
   - --destination=gcr.io/$PROJECT_ID/${_PROJECT_NAME}:${_TAG}
-  - --cache=false
+  - --cache=true
 tags: ["${_PROJECT_NAME}", "${_TAG}"]

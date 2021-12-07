@@ -11,11 +11,11 @@ jobs:
       - checkout
       - run:
           name: "Build binary "
-          command: make build-linux
+          command: make build
       - persist_to_workspace:
           root: ~/frozen-throne
           paths:
-            - bin/linux
+            - bin/
 
   deploy_cloud_function:
     working_directory: ~/frozen-throne
