@@ -1,10 +1,9 @@
 package config
 
 type Config struct {
-	WriteSecret    string `envconfig:"WRITE_SECRET" required:"true"`
-	ReadOnlySecret string `envconfig:"READ_ONLY_SECRET" required:"true"`
-	StorageMethod  string `envconfig:"STORAGE_METHOD" default:"gcs"`
-	AuditLogKey    string `envconfig:"AUDIT_LOG_KEY" default:"audit_log"`
+	WriteSecret   string `envconfig:"WRITE_SECRET" required:"true"`
+	StorageMethod string `envconfig:"STORAGE_METHOD" default:"gcs"`
+	AuditLogKey   string `envconfig:"AUDIT_LOG_KEY" default:"audit_log"`
 
 	GCSConfig
 	RedisConfig

@@ -8,6 +8,18 @@ READ_ONLY_SECRET ?= secret-read-only
 help: ## Show help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+
+.PHONY: build-linux
+build-linux: ## Build go binary for linux
+	GOOS=linux GOARCH=amd64 go build -o bin/linux/${PROJECT_NAME} ./cmd/run_frozen_throne.go
+
+.PHONY: build-darwin
+build-darwin: ## Build go binary for mac OS
+	GOOS=darwin GOARCH=amd64 go build -o bin/darwin/${PROJECT_NAME} ./cmd/run_frozen_throne.go
+
+.PHONY: build
+build: build-linux build-darwin ## Build all binaries
+
 .PHONY: create_secrets
 create_secrets: ## Create secret values
 	echo -n "${WRITE_SECRET}" | gcloud --project ${PROJECT_ID} secrets create FT_WRITE_SECRET --replication-policy="automatic" --data-file=-
