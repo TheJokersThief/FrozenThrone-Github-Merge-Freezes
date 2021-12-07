@@ -11,7 +11,14 @@
 # from your .gitignore file, remove the corresponding line
 # below:
 .git
-.gitignore
+# .gitignore
 
 node_modules
-#!include:.gitignore
+# !include:.gitignore
+!bin/
+bin/darwin
+.circleci
+frozen_throne/
+frozen_throne_server/
+README.md
+go.*

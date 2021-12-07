@@ -2,7 +2,7 @@ FROM alpine:3.13
 
 RUN adduser -D frozen-throne-user
 
-ADD bin/linux/amd64/frozen-throne /bin/frozen-throne
+ADD bin/linux/frozen_throne /bin/frozen-throne
 
 USER frozen-throne-user 
 

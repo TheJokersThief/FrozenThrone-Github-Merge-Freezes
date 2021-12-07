@@ -3,8 +3,11 @@ package frozen_throne_server
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"time"
 
 	"github.com/TheJokersThief/frozen-throne/frozen_throne"
@@ -33,6 +36,10 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 		}
 	})
+}
+
+func DefaultHandler(w http.ResponseWriter, r *http.Request) {
+	json.NewEncoder(w).Encode("Nothing here")
 }
 
 func FreezeHandler(w http.ResponseWriter, r *http.Request) {
@@ -77,6 +84,11 @@ func verifyWriteToken(token string, config config.Config) bool {
 }
 
 func Main() {
+	var wait time.Duration
+	flag.DurationVar(&wait, "graceful-timeout", time.Second*15, "the duration for which the server gracefully wait for existing connections to finish - e.g. 15s or 1m")
+	flag.Parse()
+
+	log.Println("Starting up")
 	ft = frozen_throne.NewFrozenThrone(context.Background())
 	config := Config{}
 	if err := envconfig.Process("", &config); err != nil {
@@ -84,16 +96,49 @@ func Main() {
 	}
 
 	r := mux.NewRouter()
+	r.HandleFunc("/", DefaultHandler)
 	r.HandleFunc("/{repo}/freeze", FreezeHandler).Subrouter().Use(AuthMiddleware)
 	r.HandleFunc("/{repo}/unfreeze", UnfreezeHandler).Subrouter().Use(AuthMiddleware)
 	r.HandleFunc("/{repo}/github-webhook", WebhookHandler)
 
+	log.Println("Handlers initialised")
+
 	srv := &http.Server{
 		Handler: r,
-		Addr:    "127.0.0.1:8080",
+		Addr:    "0.0.0.0:8080",
 		// Good practice: enforce timeouts for servers you create!
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
-	log.Fatal(srv.ListenAndServe())
+
+	log.Println("Beginning server")
+	// Run our server in a goroutine so that it doesn't block.
+	go func() {
+		if err := srv.ListenAndServe(); err != nil {
+			log.Println(err)
+		}
+	}()
+	log.Println("Server running")
+
+	c := make(chan os.Signal, 1)
+	// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)
+	// SIGKILL, SIGQUIT or SIGTERM (Ctrl+/) will not be caught.
+	signal.Notify(c, os.Interrupt)
+
+	log.Println("Wait until shutdown signal")
+	// Block until we receive our signal.
+	<-c
+	log.Println("Shutdown signal received")
+
+	// Create a deadline to wait for.
+	ctx, cancel := context.WithTimeout(context.Background(), wait)
+	defer cancel()
+	// Doesn't block if no connections, but will otherwise wait
+	// until the timeout deadline.
+	srv.Shutdown(ctx)
+	// Optionally, you could run srv.Shutdown in a goroutine and block on
+	// <-ctx.Done() if your application should wait for other services
+	// to finalize based on context cancellation.
+	log.Println("Shutting down")
+	os.Exit(0)
 }

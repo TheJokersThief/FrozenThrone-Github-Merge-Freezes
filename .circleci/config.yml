@@ -3,12 +3,32 @@ orbs:
   gcp-cli: circleci/gcp-cli@2.1.0
 
 jobs:
+  build:
+    working_directory: ~/frozen-throne
+    docker:
+      - image: golang:1.16
+    steps:
+      - checkout
+      - make build-linux
+      - persist_to_workspace:
+          root: ~/frozen-throne
+          paths:
+            - bin/linux
+
   deploy_cloud_function:
     working_directory: ~/frozen-throne
     docker:
       - image: circleci/python:3.7
     steps:
+      - attach_workspace:
+        at: /tmp/workspace
       - checkout
+      - run:
+          name: "Copy go binary"
+          command: mv -r /tmp/workspace/bin ./bin
+      - run:
+          name: "Copy go binary"
+          command: ls -alR bin/
       - gcp-cli/install:
           version: "365.0.1"
       - gcp-cli/initialize
