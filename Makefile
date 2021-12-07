@@ -46,7 +46,7 @@ update_secrets: ## Update secret values
 	echo "${GITHUB_APP_ID}" | tr -d \\n | gcloud --project ${PROJECT_ID} secrets versions add FT_GITHUB_APP_ID --data-file=-
 
 .PHONY: cloud_build
-cloud_build: build ## Build image and push it to GCR
+cloud_build: ## Build image and push it to GCR
 	gcloud builds submit \
 		--project ${PROJECT_ID} \
 		--config cloudbuild.yaml \
