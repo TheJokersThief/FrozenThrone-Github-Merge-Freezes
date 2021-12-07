@@ -9,7 +9,9 @@ jobs:
       - image: golang:1.16
     steps:
       - checkout
-      - make build-linux
+      - run:
+          name: "Build binary "
+          command: make build-linux
       - persist_to_workspace:
           root: ~/frozen-throne
           paths:
