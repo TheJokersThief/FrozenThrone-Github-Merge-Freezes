@@ -53,7 +53,7 @@ cloud_build: ## Build image and push it to GCR
 		--substitutions _PROJECT_NAME=${PROJECT_NAME},_TAG=latest
 
 .PHONY: deploy
-deploy: cloud_build update_secrets ## Deploy function to GCP Cloud Functions
+deploy: cloud_build ## Deploy function to GCP Cloud Functions
 	gcloud run deploy frozen-throne \
 		--region europe-west1 \
 		--project ${PROJECT_ID} \
