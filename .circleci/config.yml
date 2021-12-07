@@ -27,7 +27,7 @@ jobs:
       - checkout
       - run:
           name: "Copy go binary"
-          command: mv -r /tmp/workspace/bin ./bin
+          command: mv /tmp/workspace/bin ./bin
       - run:
           name: "Copy go binary"
           command: ls -alR bin/
