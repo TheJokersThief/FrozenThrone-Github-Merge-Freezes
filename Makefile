@@ -3,7 +3,6 @@ PROJECT_ID ?= example-project
 GCS_BUCKET ?= ${PROJECT_NAME}-test-bucket
 
 WRITE_SECRET ?= secret
-READ_ONLY_SECRET ?= secret-read-only
 WEBHOOK_SECRET ?= secretysecret
 GITHUB_APP_ID ?= 1
 
@@ -23,7 +22,6 @@ build-darwin: ## Build go binary for mac OS
 .PHONY: run
 run:
 	WRITE_SECRET=${WRITE_SECRET} \
-	READ_ONLY_SECRET=${READ_ONLY_SECRET} \
 	WEBHOOK_SECRET=${WEBHOOK_SECRET} \
 	GITHUB_APP_ID=${GITHUB_APP_ID} \
 	./bin/darwin/frozen_throne
@@ -33,20 +31,18 @@ build: build-linux build-darwin ## Build all binaries
 
 .PHONY: create_secrets
 create_secrets: ## Create secret values
-	echo -n "${WRITE_SECRET}" | gcloud --project ${PROJECT_ID} secrets create FT_WRITE_SECRET --replication-policy="automatic" --data-file=-
-	echo -n "${READ_ONLY_SECRET}" | gcloud --project ${PROJECT_ID} secrets create FT_READ_ONLY_SECRET --replication-policy="automatic" --data-file=-
-	echo -n "${WEBHOOK_SECRET}" | gcloud --project ${PROJECT_ID} secrets create FT_WEBHOOK_SECRET --replication-policy="automatic" --data-file=-
-	echo -n "${GITHUB_APP_ID}" | gcloud --project ${PROJECT_ID} secrets create FT_GITHUB_APP_ID --replication-policy="automatic" --data-file=-
-# echo -n "${GITHUB_PRIVATE_KEY}" | gcloud --project ${PROJECT_ID} secrets create FT_GITHUB_PRIVATE_KEY --replication-policy="automatic" --data-file=-
+	echo -n "${WRITE_SECRET}" | tr -d \\n | gcloud --project ${PROJECT_ID} secrets create FT_WRITE_SECRET --replication-policy="automatic" --data-file=-
+	echo -n "${WEBHOOK_SECRET}" | tr -d \\n | gcloud --project ${PROJECT_ID} secrets create FT_WEBHOOK_SECRET --replication-policy="automatic" --data-file=-
+	echo -n "${GITHUB_APP_ID}" | tr -d \\n | gcloud --project ${PROJECT_ID} secrets create FT_GITHUB_APP_ID --replication-policy="automatic" --data-file=-
+# gcloud --project ${PROJECT_ID} secrets create FT_GITHUB_PRIVATE_KEY --replication-policy="automatic" --data-file=<PATH/TO/FILE>
 
 
 .PHONY: update_secrets
 update_secrets: ## Update secret values
 	echo "${WRITE_SECRET}" | tr -d \\n | gcloud --project ${PROJECT_ID} secrets versions add FT_WRITE_SECRET --data-file=-
-	echo "${READ_ONLY_SECRET}" | tr -d \\n | gcloud --project ${PROJECT_ID} secrets versions add FT_READ_ONLY_SECRET --data-file=-
 	echo "${WEBHOOK_SECRET}" | tr -d \\n | gcloud --project ${PROJECT_ID} secrets versions add FT_WEBHOOK_SECRET --data-file=-
 	echo "${GITHUB_APP_ID}" | tr -d \\n | gcloud --project ${PROJECT_ID} secrets versions add FT_GITHUB_APP_ID --data-file=-
-# echo "${GITHUB_PRIVATE_KEY}" | tr -d \\n | gcloud --project ${PROJECT_ID} secrets versions add FT_GITHUB_PRIVATE_KEY --data-file=-
+# gcloud --project ${PROJECT_ID} secrets versions add FT_GITHUB_PRIVATE_KEY --data-file=<PATH/TO/FILE>
 
 .PHONY: cloud_build
 cloud_build: ## Build image and push it to GCR
