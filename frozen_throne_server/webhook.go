@@ -36,7 +36,8 @@ func WebhookHandler(w http.ResponseWriter, r *http.Request) {
 	case *github.PushEvent:
 		resp = processStatusCheck(*e.Installation.ID, *e.Repo.Organization, *e.Repo.Name, *e.HeadCommit.SHA)
 	default:
-		//
+		json.NewEncoder(w).Encode("Unknown webhook event")
+		return
 	}
 
 	json.NewEncoder(w).Encode(resp)

@@ -7,15 +7,6 @@ FrozenThrone is an API deployed to GCP Cloud functions for gating PR merges on G
 
 # API
 
-| Method | Description                             | Params            |
-|--------|-----------------------------------------|-------------------|
-| GET    | Retrieves the current status for a repo | token, repo       |
-| POST   | Freezes a repo                          | token, repo, user |
-| PATCH  | Unfreezes a repo                        | token, repo, user |
-
-`GET` params are passed via the URL.
-
-`POST`/`PATCH` params are passed via HTTP form data.
 
 # Deployment
 ## Create Secrets
@@ -33,12 +24,12 @@ Or update existing secrets with
 ```bash
 PROJECT_ID=<ID> \
 WRITE_SECRET=<secret> \
-READ_ONLY_SECRET=<secret>\
+READ_ONLY_SECRET=<secret> \
     make create_secrets
 ```
 
-## Deploy function
+## Deploy to Cloud Run
 
 ```bash
-PROJECT_ID=<ID> make deploy_to_gfunctions
+PROJECT_ID=<ID> make deploy
 ```
