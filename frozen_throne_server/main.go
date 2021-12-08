@@ -22,7 +22,7 @@ type StatusResponse struct {
 }
 
 var ft *frozen_throne.FrozenThrone
-var serverConfig *Config
+var serverConfig Config
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -44,11 +44,10 @@ func DefaultHandler(w http.ResponseWriter, r *http.Request) {
 
 func FreezeHandler(w http.ResponseWriter, r *http.Request) {
 	repo := mux.Vars(r)["repo"]
-	token := r.FormValue("token")
 	user := r.FormValue("user")
 
-	if token == "" || repo == "" || user == "" {
-		http.Error(w, "400 - Bad Request: Missing token, repo or user", http.StatusBadRequest)
+	if repo == "" || user == "" {
+		http.Error(w, "400 - Bad Request: Missing user in form data", http.StatusBadRequest)
 		return
 	}
 
@@ -62,11 +61,10 @@ func FreezeHandler(w http.ResponseWriter, r *http.Request) {
 
 func UnfreezeHandler(w http.ResponseWriter, r *http.Request) {
 	repo := mux.Vars(r)["repo"]
-	token := r.FormValue("token")
 	user := r.FormValue("user")
 
-	if token == "" || repo == "" || user == "" {
-		http.Error(w, "400 - Bad Request: Missing token, repo or user", http.StatusBadRequest)
+	if repo == "" || user == "" {
+		http.Error(w, "400 - Bad Request: Missing user in form data", http.StatusBadRequest)
 		return
 	}
 
@@ -90,16 +88,19 @@ func Main() {
 
 	log.Println("Starting up")
 	ft = frozen_throne.NewFrozenThrone(context.Background())
-	config := Config{}
-	if err := envconfig.Process("", &config); err != nil {
+	serverConfig = Config{}
+	if err := envconfig.Process("", &serverConfig); err != nil {
 		log.Fatalf("failed to parse config: %v", err)
 	}
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", DefaultHandler)
-	r.HandleFunc("/{repo}/freeze", FreezeHandler).Subrouter().Use(AuthMiddleware)
-	r.HandleFunc("/{repo}/unfreeze", UnfreezeHandler).Subrouter().Use(AuthMiddleware)
-	r.HandleFunc("/{repo}/github-webhook", WebhookHandler)
+	r.HandleFunc("/github-webhook", WebhookHandler)
+
+	s := r.PathPrefix("/").Subrouter()
+	s.HandleFunc("/freeze/{repo}", FreezeHandler)
+	s.HandleFunc("/unfreeze/{repo}", UnfreezeHandler)
+	s.Use(AuthMiddleware)
 
 	log.Println("Handlers initialised")
 

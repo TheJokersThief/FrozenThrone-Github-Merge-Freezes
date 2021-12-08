@@ -53,4 +53,4 @@ workflows:
             - iamevan-me/gcp
           filters:
              branches:
-               only: test-branch
+               only: main
