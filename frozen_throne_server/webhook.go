@@ -2,10 +2,10 @@ package frozen_throne_server
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
@@ -13,7 +13,8 @@ import (
 )
 
 func WebhookHandler(w http.ResponseWriter, r *http.Request) {
-	payload, err := github.ValidatePayload(r, []byte(serverConfig.WebhookSecret))
+	webhookSecret := []byte(serverConfig.WebhookSecret)
+	payload, err := github.ValidatePayload(r, webhookSecret)
 	if err != nil {
 		log.Printf("error validating request body: err=%s\n", err)
 		return
@@ -26,38 +27,32 @@ func WebhookHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	installationID := r.Header.Get("X-GitHub-Hook-Installation-Target-ID")
-	installationIDInt, parseErr := strconv.ParseInt(installationID, 10, 64)
-	if parseErr != nil {
-		log.Printf("could not parse webhook: err=%s\n", err)
-		return
+	var resp StatusResponse
+	switch e := event.(type) {
+	case *github.CheckSuiteEvent:
+		resp = processStatusCheck(*e.Installation.ID, *e.Repo.Owner.Login, *e.Repo.Name, *e.CheckSuite.HeadSHA)
+	case *github.PullRequestEvent:
+		resp = processStatusCheck(*e.Installation.ID, *e.Repo.Owner.Login, *e.Repo.Name, *e.PullRequest.Head.SHA)
+	case *github.PushEvent:
+		resp = processStatusCheck(*e.Installation.ID, *e.Repo.Organization, *e.Repo.Name, *e.HeadCommit.SHA)
+	default:
+		//
 	}
 
-	// Wrap the shared transport for use with the integration ID 1 authenticating with installation ID 99.
-	itr, err := ghinstallation.NewKeyFromFile(
-		http.DefaultTransport, serverConfig.GithubAppID, installationIDInt, "2016-10-19.private-key.pem")
+	json.NewEncoder(w).Encode(resp)
+}
+
+func processStatusCheck(installationID int64, org string, repo string, headSHA string) StatusResponse {
+	ctx := context.Background()
+	itr, err := ghinstallation.New(
+		http.DefaultTransport, serverConfig.GithubAppID, installationID,
+		[]byte(serverConfig.GithubAppPrivateKey))
 	if err != nil {
-		log.Printf("could not parse webhook: err=%s\n", err)
-		return
+		log.Printf("error initialising integration transport err=%s\n", err)
 	}
 
 	// Use installation transport with client.
 	client := github.NewClient(&http.Client{Transport: itr})
-
-	switch e := event.(type) {
-	case *github.CheckSuiteEvent:
-		processStatusCheck(client, *e.Org.Name, *e.Repo.Name, *e.CheckSuite.HeadSHA)
-	case *github.PullRequestEvent:
-		processStatusCheck(client, *e.Repo.Organization.Name, *e.Repo.Name, *e.PullRequest.Head.SHA)
-	case *github.PushEvent:
-		processStatusCheck(client, *e.Repo.Organization, *e.Repo.Name, *e.HeadCommit.SHA)
-	default:
-		//
-	}
-}
-
-func processStatusCheck(client *github.Client, org string, repo string, headSHA string) StatusResponse {
-	ctx := context.Background()
 
 	_, statusErr := ft.Check(repo)
 
@@ -66,13 +61,14 @@ func processStatusCheck(client *github.Client, org string, repo string, headSHA 
 	if statusErr == nil {
 		// If the status error is nil, that means it is frozen
 		status = "in_progress"
-		title = fmt.Sprintf("%s is frozen", repo)
+		title = fmt.Sprintf("Repo \"%s\" is frozen", repo)
 		text = "All merges have been blocked."
-		returnResp = StatusResponse{}
+		returnResp = StatusResponse{Frozen: true}
 	} else {
 		status = "completed"
-		title = fmt.Sprintf("%s is not frozen", repo)
+		title = fmt.Sprintf("Repo \"%s\" is not frozen", repo)
 		text = "All merges are okay."
+		returnResp = StatusResponse{Frozen: false}
 	}
 
 	checkOptions := github.CreateCheckRunOptions{
@@ -86,6 +82,13 @@ func processStatusCheck(client *github.Client, org string, repo string, headSHA 
 			Text:    &text,
 		},
 	}
-	client.Checks.CreateCheckRun(ctx, org, repo, checkOptions)
+
+	if status == "completed" {
+		conclusion := "success"
+		checkOptions.Conclusion = &conclusion
+	}
+
+	_, _, err = client.Checks.CreateCheckRun(ctx, org, repo, checkOptions)
+	returnResp.Error = err
 	return returnResp
 }

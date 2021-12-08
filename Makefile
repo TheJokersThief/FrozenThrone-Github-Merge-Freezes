@@ -37,6 +37,8 @@ create_secrets: ## Create secret values
 	echo -n "${READ_ONLY_SECRET}" | gcloud --project ${PROJECT_ID} secrets create FT_READ_ONLY_SECRET --replication-policy="automatic" --data-file=-
 	echo -n "${WEBHOOK_SECRET}" | gcloud --project ${PROJECT_ID} secrets create FT_WEBHOOK_SECRET --replication-policy="automatic" --data-file=-
 	echo -n "${GITHUB_APP_ID}" | gcloud --project ${PROJECT_ID} secrets create FT_GITHUB_APP_ID --replication-policy="automatic" --data-file=-
+# echo -n "${GITHUB_PRIVATE_KEY}" | gcloud --project ${PROJECT_ID} secrets create FT_GITHUB_PRIVATE_KEY --replication-policy="automatic" --data-file=-
+
 
 .PHONY: update_secrets
 update_secrets: ## Update secret values
@@ -44,6 +46,7 @@ update_secrets: ## Update secret values
 	echo "${READ_ONLY_SECRET}" | tr -d \\n | gcloud --project ${PROJECT_ID} secrets versions add FT_READ_ONLY_SECRET --data-file=-
 	echo "${WEBHOOK_SECRET}" | tr -d \\n | gcloud --project ${PROJECT_ID} secrets versions add FT_WEBHOOK_SECRET --data-file=-
 	echo "${GITHUB_APP_ID}" | tr -d \\n | gcloud --project ${PROJECT_ID} secrets versions add FT_GITHUB_APP_ID --data-file=-
+# echo "${GITHUB_PRIVATE_KEY}" | tr -d \\n | gcloud --project ${PROJECT_ID} secrets versions add FT_GITHUB_PRIVATE_KEY --data-file=-
 
 .PHONY: cloud_build
 cloud_build: ## Build image and push it to GCR
@@ -60,7 +63,7 @@ deploy: cloud_build ## Deploy function to GCP Cloud Functions
 		--memory 128Mi \
 		--timeout 20s \
 		--set-env-vars GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GCS_BUCKET="${GCS_BUCKET}" \
-		--set-secrets 'WRITE_SECRET=FT_WRITE_SECRET:latest,READ_ONLY_SECRET=FT_READ_ONLY_SECRET:latest,WEBHOOK_SECRET=FT_WEBHOOK_SECRET:latest,GITHUB_APP_ID=FT_GITHUB_APP_ID:latest' \
+		--set-secrets 'WRITE_SECRET=FT_WRITE_SECRET:latest,READ_ONLY_SECRET=FT_READ_ONLY_SECRET:latest,WEBHOOK_SECRET=FT_WEBHOOK_SECRET:latest,GITHUB_APP_ID=FT_GITHUB_APP_ID:latest,GITHUB_APP_PRIVATE_KEY=FT_GITHUB_PRIVATE_KEY:latest' \
 		--max-instances 10 \
 		--port 8080 \
 		--allow-unauthenticated \
