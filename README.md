@@ -3,6 +3,9 @@
 # Frozen Throne (Merge Freezes)
 FrozenThrone is an API deployed to GCP Cloud functions for gating PR merges on Github.
 
+![image](https://user-images.githubusercontent.com/1175876/145129534-2a353280-08d9-4a65-9377-b3de7a44b23e.png)
+
+
 # API
 
 | Method | Description                             | Params            |
