@@ -14,7 +14,6 @@ import (
 
 func WebhookHandler(w http.ResponseWriter, r *http.Request) {
 	webhookSecret := []byte(serverConfig.WebhookSecret)
-	log.Printf("%v %v", serverConfig.WebhookSecret, webhookSecret)
 	payload, err := github.ValidatePayload(r, webhookSecret)
 	if err != nil {
 		log.Printf("error validating request body: err=%s\n", err)
@@ -31,7 +30,7 @@ func WebhookHandler(w http.ResponseWriter, r *http.Request) {
 	var resp StatusResponse
 	switch e := event.(type) {
 	case *github.CheckSuiteEvent:
-		resp = processStatusCheck(*e.Installation.ID, *e.Org.Name, *e.Repo.Name, *e.CheckSuite.HeadSHA)
+		resp = processStatusCheck(*e.Installation.ID, *e.Repo.Owner.Login, *e.Repo.Name, *e.CheckSuite.HeadSHA)
 	case *github.PullRequestEvent:
 		resp = processStatusCheck(*e.Installation.ID, *e.Repo.Owner.Login, *e.Repo.Name, *e.PullRequest.Head.SHA)
 	case *github.PushEvent:
@@ -58,18 +57,18 @@ func processStatusCheck(installationID int64, org string, repo string, headSHA s
 	_, statusErr := ft.Check(repo)
 
 	var returnResp StatusResponse
-	var status, title, text, conclusion string
-	conclusion = "success"
+	var status, title, text string
 	if statusErr == nil {
 		// If the status error is nil, that means it is frozen
 		status = "in_progress"
 		title = fmt.Sprintf("Repo \"%s\" is frozen", repo)
 		text = "All merges have been blocked."
-		returnResp = StatusResponse{}
+		returnResp = StatusResponse{Frozen: true}
 	} else {
 		status = "completed"
 		title = fmt.Sprintf("Repo \"%s\" is not frozen", repo)
 		text = "All merges are okay."
+		returnResp = StatusResponse{Frozen: false}
 	}
 
 	checkOptions := github.CreateCheckRunOptions{
@@ -82,9 +81,14 @@ func processStatusCheck(installationID int64, org string, repo string, headSHA s
 			Summary: &title,
 			Text:    &text,
 		},
-		Conclusion: &conclusion,
 	}
-	_, resp, err := client.Checks.CreateCheckRun(ctx, org, repo, checkOptions)
-	log.Printf("%v | %v", err, resp)
+
+	if status == "completed" {
+		conclusion := "success"
+		checkOptions.Conclusion = &conclusion
+	}
+
+	_, _, err = client.Checks.CreateCheckRun(ctx, org, repo, checkOptions)
+	returnResp.Error = err
 	return returnResp
 }
