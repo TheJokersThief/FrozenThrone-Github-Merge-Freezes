@@ -9,11 +9,13 @@ jobs:
       - image: golang:1.16
     steps:
       - checkout
-      - make build-linux
+      - run:
+          name: "Build binary "
+          command: make build
       - persist_to_workspace:
           root: ~/frozen-throne
           paths:
-            - bin/linux
+            - bin/
 
   deploy_cloud_function:
     working_directory: ~/frozen-throne
@@ -21,36 +23,34 @@ jobs:
       - image: circleci/python:3.7
     steps:
       - attach_workspace:
-        at: /tmp/workspace
+          at: /tmp/workspace
       - checkout
       - run:
           name: "Copy go binary"
-          command: mv -r /tmp/workspace/bin ./bin
-      - run:
-          name: "Copy go binary"
-          command: ls -alR bin/
+          command: mv /tmp/workspace/bin ./bin
       - gcp-cli/install:
           version: "365.0.1"
       - gcp-cli/initialize
-      # - run:
-      #     name: "Update secrets"
-      #     command: |
-      #       PROJECT_ID=$GOOGLE_PROJECT_ID\
-      #         WRITE_SECRET=$WRITE_SECRET\
-      #         READ_ONLY_SECRET=$READ_ONLY_SECRET\
-      #         make update_secrets
-      # - run:
-      #     name: "Deploy Cloud Function"
-      #     command: |
-      #       PROJECT_ID=$GOOGLE_PROJECT_ID make deploy_to_gfunctions
+      - run:
+          name: "Update secrets"
+          command: |
+            PROJECT_ID=$GOOGLE_PROJECT_ID\
+              WRITE_SECRET=$WRITE_SECRET\
+              READ_ONLY_SECRET=$READ_ONLY_SECRET\
+              WEBHOOK_SECRET=$WEBHOOK_SECRET\
+              GITHUB_APP_ID=$GITHUB_APP_ID\
+              make update_secrets
 
 workflows:
   version: 2
   deploy:
     jobs:
+      - build
       - deploy_cloud_function:
+          requires:
+            - build
           context:
             - iamevan-me/gcp
           filters:
              branches:
-               only: main
+               only: test-branch

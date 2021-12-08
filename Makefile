@@ -46,14 +46,14 @@ update_secrets: ## Update secret values
 	echo "${GITHUB_APP_ID}" | tr -d \\n | gcloud --project ${PROJECT_ID} secrets versions add FT_GITHUB_APP_ID --data-file=-
 
 .PHONY: cloud_build
-cloud_build: build ## Build image and push it to GCR
+cloud_build: ## Build image and push it to GCR
 	gcloud builds submit \
 		--project ${PROJECT_ID} \
 		--config cloudbuild.yaml \
 		--substitutions _PROJECT_NAME=${PROJECT_NAME},_TAG=latest
 
 .PHONY: deploy
-deploy: cloud_build update_secrets ## Deploy function to GCP Cloud Functions
+deploy: cloud_build ## Deploy function to GCP Cloud Functions
 	gcloud run deploy frozen-throne \
 		--region europe-west1 \
 		--project ${PROJECT_ID} \
@@ -61,7 +61,7 @@ deploy: cloud_build update_secrets ## Deploy function to GCP Cloud Functions
 		--timeout 20s \
 		--set-env-vars GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GCS_BUCKET="${GCS_BUCKET}" \
 		--set-secrets 'WRITE_SECRET=FT_WRITE_SECRET:latest,READ_ONLY_SECRET=FT_READ_ONLY_SECRET:latest,WEBHOOK_SECRET=FT_WEBHOOK_SECRET:latest,GITHUB_APP_ID=FT_GITHUB_APP_ID:latest' \
-		--max-instances 10\
+		--max-instances 10 \
 		--port 8080 \
 		--allow-unauthenticated \
 		--image gcr.io/${PROJECT_ID}/${PROJECT_NAME}:latest
