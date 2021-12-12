@@ -56,7 +56,6 @@ $ curl -X POST -H "X-Access-Token: SECRET" localhost:8080/thaw/frozen-throne -d 
 The deployed cloud function uses the GCP Secret Manager to store secret values for:
 
 1. The Write Secret token
-1. The Read-Only Secret token
 1. The secret used to sign webhooks from Github
 1. The Github App ID
 1. The Github App's private key
