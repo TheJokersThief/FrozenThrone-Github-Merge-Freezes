@@ -27,6 +27,8 @@ func NewFrozenThrone(ctx context.Context) *FrozenThrone {
 	switch config.StorageMethod {
 	case "gcs":
 		throneStorage = storage.NewGCSStorage(config, ctx)
+	case "file":
+		throneStorage = storage.NewFileStorage(config)
 	default:
 		panic("Storage method chosen does not match the methods available")
 	}
