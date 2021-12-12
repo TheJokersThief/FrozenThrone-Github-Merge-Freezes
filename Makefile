@@ -2,7 +2,7 @@ PROJECT_NAME = frozen_throne
 PROJECT_ID ?= example-project
 GCS_BUCKET ?= ${PROJECT_NAME}-test-bucket
 
-WRITE_SECRET ?= secret
+WRITE_SECRET ?= SECRET
 WEBHOOK_SECRET ?= secretysecret
 GITHUB_APP_ID ?= 1
 

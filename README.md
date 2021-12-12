@@ -20,15 +20,15 @@ Frozen Throne is an API deployed to GCP Cloud Run for gating PR merges on Github
 
 # API
 
-| Endpoint         | Description              | POST data            |
-|------------------|--------------------------|----------------------|
-| /freeze/{repo}   | Freeze the github {repo} | `user`               |
-| /unfreeze/{repo} | Unfreezes a repo         | `user`               |
-| /github-webhook  |                          | github webhook event |
+| Endpoint         | Description                    | POST data            |
+|------------------|--------------------------------|----------------------|
+| /freeze/{repo}   | Freeze the github {repo}       | `user`               |
+| /thaw/{repo}     | Thaws a repo, allowing merges  | `user`               |
+| /github-webhook  |                                | github webhook event |
 
 ## Authentication
 
-The freeze and unfreeze endpoints both require authentication in the form of a header in the request.
+The freeze and thaw endpoints both require authentication in the form of a header in the request.
 
 ```
 X-Access-Token: WRITE_SECRET
@@ -40,7 +40,7 @@ X-Access-Token: WRITE_SECRET
 $ curl -X POST -H "X-Access-Token: SECRET" localhost:8080/freeze/frozen-throne -d "user=thejokersthief"
 {"frozen":true}
 
-$ curl -X POST -H "X-Access-Token: SECRET" localhost:8080/unfreeze/frozen-throne -d "user=thejokersthief"
+$ curl -X POST -H "X-Access-Token: SECRET" localhost:8080/thaw/frozen-throne -d "user=thejokersthief"
 {"frozen":false}
 ```
 
