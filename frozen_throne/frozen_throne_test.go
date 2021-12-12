@@ -3,6 +3,7 @@ package frozen_throne
 import (
 	"context"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/TheJokersThief/frozen-throne/frozen_throne/config"
@@ -23,8 +24,8 @@ var wantConfig = config.Config{
 }
 
 func throneSetup(t *testing.T) *FrozenThrone {
-	t.Setenv("WRITE_SECRET", wantConfig.WriteSecret)
-	t.Setenv("STORAGE_METHOD", wantConfig.StorageMethod)
+	os.Setenv("WRITE_SECRET", wantConfig.WriteSecret)
+	os.Setenv("STORAGE_METHOD", wantConfig.StorageMethod)
 	return NewFrozenThrone(context.Background())
 }
 
