@@ -3,7 +3,7 @@ orbs:
   gcp-cli: circleci/gcp-cli@2.1.0
 
 jobs:
-  build:
+  test:
     working_directory: ~/frozen-throne
     docker:
       - image: golang:1.16
@@ -12,6 +12,13 @@ jobs:
       - run:
           name: "Run tests"
           command: "go test ./..."
+
+  build:
+    working_directory: ~/frozen-throne
+    docker:
+      - image: golang:1.16
+    steps:
+      - checkout
       - run:
           name: "Build binary "
           command: make build
@@ -48,10 +55,12 @@ workflows:
   version: 2
   deploy:
     jobs:
+      - test
       - build
       - deploy_cloud_function:
           requires:
             - build
+            - test
           context:
             - iamevan-me/gcp
           filters:
