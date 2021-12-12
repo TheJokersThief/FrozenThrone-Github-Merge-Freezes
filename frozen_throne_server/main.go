@@ -51,7 +51,7 @@ func FreezeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	freezeErr := ft.Freeze(repo)
+	freezeErr := ft.Freeze(repo, user)
 	if freezeErr != nil {
 		json.NewEncoder(w).Encode(StatusResponse{Frozen: false, Error: freezeErr})
 		return
@@ -59,7 +59,7 @@ func FreezeHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(StatusResponse{Frozen: true})
 }
 
-func UnfreezeHandler(w http.ResponseWriter, r *http.Request) {
+func ThawHandler(w http.ResponseWriter, r *http.Request) {
 	repo := mux.Vars(r)["repo"]
 	user := r.FormValue("user")
 
@@ -68,7 +68,7 @@ func UnfreezeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	freezeErr := ft.Unfreeze(repo)
+	freezeErr := ft.Thaw(repo, user)
 	if freezeErr != nil {
 		json.NewEncoder(w).Encode(StatusResponse{Frozen: true, Error: freezeErr})
 		return
@@ -99,7 +99,7 @@ func Main() {
 
 	s := r.PathPrefix("/").Subrouter()
 	s.HandleFunc("/freeze/{repo}", FreezeHandler)
-	s.HandleFunc("/unfreeze/{repo}", UnfreezeHandler)
+	s.HandleFunc("/thaw/{repo}", ThawHandler)
 	s.Use(AuthMiddleware)
 
 	log.Println("Handlers initialised")

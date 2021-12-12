@@ -3,6 +3,7 @@ package frozen_throne
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/kelseyhightower/envconfig"
 
@@ -36,14 +37,37 @@ func NewFrozenThrone(ctx context.Context) *FrozenThrone {
 	}
 }
 
-func (f *FrozenThrone) Freeze(name string) error {
-	return f.Storage.PlaceKey(name)
+// Freeze will prevent merges for a repo
+func (f *FrozenThrone) Freeze(name string, user string) error {
+	err := f.Storage.PlaceKey(name)
+
+	action := "freeze"
+	metadata := storage.ThroneMetadata{
+		Action:    action,
+		User:      user,
+		Repo:      name,
+		Timestamp: time.Now(),
+	}
+	f.Storage.LogAction(action, user, name, metadata)
+	return err
 }
 
-func (f *FrozenThrone) Unfreeze(name string) error {
-	return f.Storage.RemoveKey(name)
+// Thaw will allow merges for a repo
+func (f *FrozenThrone) Thaw(name string, user string) error {
+	err := f.Storage.RemoveKey(name)
+
+	action := "thaw"
+	metadata := storage.ThroneMetadata{
+		Action:    action,
+		User:      user,
+		Repo:      name,
+		Timestamp: time.Now(),
+	}
+	f.Storage.LogAction(action, user, name, metadata)
+	return err
 }
 
+// Check will see if a repo is currently frozen
 func (f *FrozenThrone) Check(name string) (string, error) {
 	return f.Storage.GetKey(name)
 }
