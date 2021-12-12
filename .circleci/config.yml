@@ -10,11 +10,11 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Build binary "
-          command: make build
-      - run:
           name: "Run tests"
           command: "go test ./..."
+      - run:
+          name: "Build binary "
+          command: make build
       - persist_to_workspace:
           root: ~/frozen-throne
           paths:
