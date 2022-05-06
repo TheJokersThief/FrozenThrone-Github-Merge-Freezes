@@ -60,7 +60,7 @@ The deployed cloud function uses the GCP Secret Manager to store secret values f
 1. The Github App ID
 1. The Github App's private key
 
-The first 4 of these can be created with the following command:
+The first 3 of these can be created with the following command:
 
 ```bash
 PROJECT_ID=<ID> \
